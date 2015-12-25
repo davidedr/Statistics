@@ -236,7 +236,6 @@ r_to^2
 R_squared_to
 abs(R_squared_to - r_to^2) < 1E-8
 
-abs()
 par(mfrow = c(1, 1))
 plot(dad_df$BODY.WEIGHT, dad_df$TOTAL.COST.TO.HOSPITAL, pch = 19, col = "blue")
 points(dad_df$BODY.WEIGHT, dad_df$fitted_to, pch = 19, col = "red")
@@ -272,9 +271,3 @@ bw_cost_lm
 summary(bw_cost_lm)
 
 ```
-
-```{r, echo=FALSE}
-plot(cars)
-```
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
