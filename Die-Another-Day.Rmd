@@ -1,0 +1,280 @@
+---
+title: "Die-Another-Day"
+author: "D"
+date: "24 dicembre 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. 
+You can embed an R code chunk like this:
+
+### Clean up
+```{r}
+rm(list = ls())
+```
+
+### Data load
+```{r}
+dad_df = read.csv("C:\\Nuova cartella\\QM901x Predictive Analytics\\Week 2\\DAD_DATA_with_Model_Output.DOWNLOADED.csv")
+
+dad_df$LN.TOTAL.COST = log(dad_df$TOTAL.COST.TO.HOSPITAL)
+```
+
+```{r}
+summary(dad_df)
+par(mfrow = c(1,1))
+plot(dad_df$BODY.WEIGHT, pch = 19, col = "blue", main = "Body Weight data", xlab = "Sample no.")
+plot(dad_df$TOTAL.COST.TO.HOSPITAL, pch = 19, col = "blue", main = "Total Cost of Treatment", xlab = "Sample no.")
+plot(dad_df$LN.TOTAL.COST, pch = 19, col = "blue", main = "LN(Total cost of tratment)", xlab = "Sample no.")
+
+```
+
+Box plots:
+```{r}
+par(mfrow = c(3, 1))
+boxplot(dad_df$BODY.WEIGHT, horizontal = TRUE, xlab = "Body weight")
+boxplot(dad_df$TOTAL.COST.TO.HOSPITAL, horizontal = TRUE, xlab = "Total cost of treatment")
+boxplot(dad_df$LN.TOTAL.COST, horizontal = TRUE, xlab = "Ln(Total cost of treatment)")
+```
+
+Histograms with mean (red) and median (blue):
+```{r}
+par(mfrow = c(1, 1))
+breaks = 20
+hist(dad_df$BODY.WEIGHT, col = "light blue", breaks = breaks)
+mean_bodyweight = mean(dad_df$BODY.WEIGHT)
+median_bodyweight = median(dad_df$BODY.WEIGHT)
+lines(rep(mean_bodyweight, breaks), seq(0, 150, length = breaks), col = "red", lwd = 5)
+lines(rep(median_bodyweight, breaks), seq(0, 150, length = breaks), col = "blue", lwd = 5)
+
+hist(dad_df$TOTAL.COST.TO.HOSPITAL, col = "light blue", breaks = breaks)
+mean_totalcost = mean(dad_df$TOTAL.COST.TO.HOSPITAL)
+median_totalcost = median(dad_df$TOTAL.COST.TO.HOSPITAL)
+lines(rep(mean_totalcost, breaks), seq(0, 150, length = breaks), col = "red", lwd = 5)
+lines(rep(median_totalcost, breaks), seq(0, 150, length = breaks), col = "blue", lwd = 5)
+
+hist(dad_df$LN.TOTAL.COST, col = "light blue", breaks = breaks)
+mean_lntotalcost = mean(dad_df$LN.TOTAL.COST)
+median_totalcost = median(dad_df$LN.TOTAL.COST)
+lines(rep(mean_lntotalcost, breaks), seq(0, 150, length = breaks), col = "red", lwd = 5)
+lines(rep(median_totalcost, breaks), seq(0, 150, length = breaks), col = "blue", lwd = 5)
+```
+
+Average (mean) minimizes sum of square deviations:
+TO BE DONE
+```{r}
+```
+
+```{r}
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, dad_df$TOTAL.COST.TO.HOSPITAL, pch = 19, col = "blue")
+plot(jitter(dad_df$BODY.WEIGHT, factor = 2), jitter(dad_df$TOTAL.COST.TO.HOSPITAL, factor = 2), pch = 19, col = "blue")
+```
+
+```{r}
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, dad_df$LN.TOTAL.COST, pch = 19, col = "blue")
+plot(jitter(dad_df$BODY.WEIGHT, factor = 2), jitter(dad_df$LN.TOTAL.COST, factor = 2), pch = 19, col = "blue")
+
+```
+
+# FITTING LN(TOTAL COST OF TREATMENT)
+Hand-made linear model "body weight vs ln(total cost)":
+```{r}
+covariance_ln = cov(dad_df$BODY.WEIGHT, dad_df$LN.TOTAL.COST)
+variance_bw = var(dad_df$BODY.WEIGHT)
+beta_1 = covariance_ln/variance_bw
+beta_0 = mean_lntotalcost - beta_1*mean_bodyweight
+
+dad_df$fitted_ln = beta_0 + dad_df$BODY.WEIGHT*beta_1
+dad_df$residuals_ln = dad_df$LN.TOTAL.COST - dad_df$fitted_ln # errors
+
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, dad_df$LN.TOTAL.COST, pch = 19, col = "blue")
+points(dad_df$BODY.WEIGHT, dad_df$fitted_ln, col = "red")
+
+# residuals plot
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, dad_df$residuals_ln, pch = 19, col = "blue")
+
+par(mfrow = c(1, 1))
+hist(dad_df$residuals_ln, breaks = 20)
+std_dev_res = sum(dad_df$residuals_ln^2)
+ll = seq(min(dad_df$residuals_ln), max(dad_df$residuals_ln), length = 100)
+ll_n = (ll - mean(dad_df$residuals_ln))/sd(dad_df$residuals_ln)
+lines(ll, dnorm(ll, mean(dad_df$residuals_ln), sd(dad_df$residuals_ln)), lwd = 3, col = "red")
+lines(ll_n, dnorm(ll_n, 0, 1), lwd = 3, col = "blue")
+
+
+# correlation coefficient
+r = cov(dad_df$BODY.WEIGHT, dad_df$LN.TOTAL.COST)/sd(dad_df$BODY.WEIGHT)/sd(dad_df$LN.TOTAL.COST)
+
+# coefficient of determination
+# rough indicator of worth of the regression model
+R_squared = r^2
+
+# SST = sum (y_i + y_bar)^2       TOTAL VARIATION
+# how much error is there in predicting y w/o the knowledge of x?
+SST = sum((dad_df$LN.TOTAL.COST - mean_lntotalcost)^2)
+
+# SSE sum (y_i - y_hat_i)^2       UNEXPLAINED VARIATION: errors
+# how much error is there in predicting y with the knowledge of x?
+SSE = sum((dad_df$LN.TOTAL.COST - dad_df$fitted_ln)^2)
+
+# SSR = sum (y_hat_i - y_bar)^2   EXPLAINED VARIATION
+# variation in y explained by the model
+SSR = sum((dad_df$fitted_ln - mean_lntotalcost)^2)
+
+SST
+SSE + SSR
+
+# SST = SSE + SSR
+abs(SST - (SSE + SSR)) < 1E-8
+
+# Coefficient of determination R is the fraction of explained variation
+# in total variation
+R_squared = SSR/SST
+
+r^2
+R_squared
+abs(R_squared - (SSR/SST)) < 1E-8
+```
+
+Normal QQ plot:
+```{r}
+qqnorm(dad_df$residuals_ln, main = "Hand made fitting")
+qqline(dad_df$residuals_ln)
+
+```
+
+##Linear model "body weight vs ln(total cost)" by lm function:
+```{r}
+bw_lncost_lm = lm(dad_df$LN.TOTAL.COST ~ dad_df$BODY.WEIGHT)
+bw_lncost_lm
+summary(bw_lncost_lm)
+
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, dad_df$LN.TOTAL.COST, pch = 19, col = "blue")
+points(dad_df$BODY.WEIGHT, bw_lncost_lm$fitted, pch = 19, col = "red")
+
+# residuals plot
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, bw_lncost_lm$residuals, pch = 19, col = "blue")
+```
+
+```{r}
+# Standard error of the estimate S_e,
+# i.e. a measure of variability of observed values around the regression line
+
+# use n-2 since we computed two parameters from n samples
+S_e_ln = sqrt(SSE/(length(dad_df$LN.TOTAL.COST) - 2))
+
+# plot this thing
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, dad_df$LN.TOTAL.COST, pch = 19, col = "blue")
+points(dad_df$BODY.WEIGHT, beta_0 + dad_df$BODY.WEIGHT*beta_1, col = "red", pch = 19)
+lines(dad_df$BODY.WEIGHT, beta_0 + dad_df$BODY.WEIGHT*beta_1 - S_e_ln, col = "red")
+lines(dad_df$BODY.WEIGHT, beta_0 + dad_df$BODY.WEIGHT*beta_1 + S_e_ln, col = "red")
+```
+
+```{r}
+qqnorm(bw_lncost_lm$residuals, main = "Fitted by lm function")
+qqline(bw_lncost_lm$residuals)
+
+```
+
+Standard errors for beta_0, beta_1:
+```{r}
+SS_x = sum((dad_df$BODY.WEIGHT - mean(dad_df$BODY.WEIGHT))^2)
+
+S_e_beta_0_ln = S_e_ln*sqrt(sum(dad_df$BODY.WEIGHT^2))/sqrt(length(dad_df$BODY.WEIGHT)*SS_x)
+
+S_e_beta_1_ln = S_e_ln/sqrt(SS_x)
+
+```
+
+Another way to compute beta_1:
+```{r}
+k_ln = dad_df$BODY.WEIGHT - mean(dad_df$BODY.WEIGHT)
+sum(k_ln * dad_df$LN.TOTAL.COST)/sum((dad_df$BODY.WEIGHT - mean(dad_df$BODY.WEIGHT))^2)
+beta_1
+
+```
+
+# FITTING TOTAL COST OF TREATMENT
+```{r}
+covariance_to = cov(dad_df$BODY.WEIGHT, dad_df$TOTAL.COST.TO.HOSPITAL)
+variance_bw = var(dad_df$BODY.WEIGHT)
+beta_1_to = covariance_to/variance_bw
+beta_0_to = mean_totalcost - beta_1_to*mean_bodyweight
+dad_df$fitted_to = beta_0_to + beta_1_to*dad_df$BODY.WEIGHT
+dad_df$residuals_to = dad_df$TOTAL.COST.TO.HOSPITAL - dad_df$fitted_to
+
+# SST = sum (y_i - y_bar)^2     TOTAL VARIANCE
+SST_to = sum((dad_df$TOTAL.COST.TO.HOSPITAL - mean(dad_df$TOTAL.COST.TO.HOSPITAL))^2)
+
+# SSE = sum (y_i - y_hat_i)^2   TOTAL ERROR
+SSE_to = sum((dad_df$TOTAL.COST.TO.HOSPITAL - dad_df$fitted_to)^2)
+
+# SSR
+SSR_to = sum((dad_df$fitted_to - mean(dad_df$TOTAL.COST.TO.HOSPITAL))^2)
+
+SST_to
+SSE_to + SSR_to
+
+abs(SST_to - (SSE_to + SSR_to)) < 1E-8
+
+# correlation coefficient
+r_to = cov(dad_df$BODY.WEIGHT, dad_df$TOTAL.COST.TO.HOSPITAL)/sd(dad_df$BODY.WEIGHT)/sd(dad_df$TOTAL.COST.TO.HOSPITAL)
+
+# coefficient of determination
+R_squared_to = SSR_to/SST_to
+
+r_to^2
+R_squared_to
+abs(R_squared_to - r_to^2) < 1E-8
+
+abs()
+par(mfrow = c(1, 1))
+plot(dad_df$BODY.WEIGHT, dad_df$TOTAL.COST.TO.HOSPITAL, pch = 19, col = "blue")
+points(dad_df$BODY.WEIGHT, dad_df$fitted_to, pch = 19, col = "red")
+
+S_e_to = sqrt(SSE_to/(length(dad_df$BODY.WEIGHT) - 2))
+
+lines(dad_df$BODY.WEIGHT, beta_0_to + beta_1_to*dad_df$BODY.WEIGHT - S_e_to, col = "red")
+lines(dad_df$BODY.WEIGHT, beta_0_to + beta_1_to*dad_df$BODY.WEIGHT + S_e_to, col = "red")
+```
+
+Normal QQ plot:
+```{r}
+qqnorm(dad_df$residuals_to, main = "Total cost of treatment - Hand made fitting")
+qqline(dad_df$residuals_to)
+
+```
+
+Standard errors for beta_0, beta_1:
+```{r}
+SS_x = sum((dad_df$BODY.WEIGHT - mean(dad_df$BODY.WEIGHT))^2)
+
+S_e_beta_0_to = S_e_to*sqrt(sum(dad_df$BODY.WEIGHT^2))/sqrt(length(dad_df$BODY.WEIGHT)*SS_x)
+
+S_e_beta_1_to = S_e_to/sqrt(SS_x)
+
+```
+
+##Linear model "body weight vs total cost" by lm function:
+```{r}
+bw_cost_lm = lm(dad_df$TOTAL.COST.TO.HOSPITAL ~ dad_df$BODY.WEIGHT)
+bw_cost_lm
+
+summary(bw_cost_lm)
+
+```
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
