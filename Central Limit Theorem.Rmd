@@ -1,0 +1,117 @@
+---
+title: "Central Limit Theorem"
+author: "D"
+date: "26 dicembre 2015"
+output: html_document
+---
+1. Perfect coin P(X = 0) = P(H) = 0.5 = p, P(X = 1) = P(T) = 0.5
+```{r}
+rm(list = ls())
+
+N = 1000 # Num of coin toss
+p = 0.5
+
+```
+E[x] = sum_i_1_2 X_i*P(X = x_i) = P(X = 0)*(1 - 0.5)  + P(X = 1)*0.5 = P(H)*p + P(T)*0.5 = 0*0.5 + 1*0.5 = 0.5
+```{r}
+E_X = 0*0.5 + 1*0.5
+
+```
+
+VAR(X) = E[(x - E[x])^2]:
+```{r}
+VAR_X = (0 - E_X)^2*(1 - p) + (1 - E_X)^2*p
+
+```
+
+2. Compute probability that in N coin toss the number of heads will not be greather than MAX_HEADS = 549. Each coin toss is X_i; X_i are random variables:
+1. independent
+2. with same distribution
+3. with mean m = 0.5 and variance sigma_2 = 0.24
+
+Compute probability that in N = 1000 coin toss we do not get more than 549 Heads
+```{r}
+#rm(list = ls())
+
+N = 1000
+MAX_HEADS = 549
+x_star = (549 - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+x_star
+x = seq(-10, +10, length = 100)
+y = dnorm(x, 0, 1)
+plot(x, y, pch = 19, col = "red")
+lines(x, y, col = "red", lwd = 2)
+arrows(x_star, 0.25, x_star, 0, lwd = 3,  col = "blue")
+
+P_min_star = pnorm(x_star, 0, 1)
+P_min_star
+```
+
+3. A random number generator produces 50 random nubbers.
+What's the probability that the sum lies between 20 and 30?
+Each generation is a random variabile
+1. independent
+2. equally distributed
+3. distribution is uniform between 0 and 1
+4. mean = 1/2 0 0.5; Var = 1/12
+```{r}
+N = 50
+E_x = 1/2
+VAR_X = 1/12
+min = 20
+max = 30
+min_star = (min - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+max_star = (max - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+
+P_min_star = pnorm(min_star, 0, 1)
+P_max_star = pnorm(max_star, 0, 1)
+
+x = seq(-5, +5, length = 100)
+y = dnorm(x, 0, 1)
+plot(x, y, pch = 19, col = "red")
+lines(x, y, col = "red", lwd = 2)
+arrows(min_star, 0.25, min_star, 0, lwd = 3,  col = "blue")
+arrows(max_star, 0.25, max_star, 0, lwd = 3,  col = "blue")
+
+P_max_star - P_min_star
+```
+
+
+4. In a class of 30 students average of past tests is 6.2 and standard deviation = 2.5. Compute the probability that next test average will lie between 6 and 6.3
+Average is S_30 = SUM_i_1_30 X_i, X_i mark of each student
+X_i are
+1. independent
+2. equally distributed
+3. having mean 6.2 and standard deviation 2.5
+Need to compute P(6.0 <= S_n/30 <= 6.2)
+```{r}
+rm(list = ls())
+N = 30
+E_X = 6.2
+VAR_X = 2.5^2
+
+min_ave = 6.0
+max_ave = 6.3
+
+min_S_n = min_ave*30
+max_S_n = max_ave*30
+
+# get the standard
+min_S_n_star = (min_S_n - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+max_S_n_star = (max_S_n - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+
+P_min_star = pnorm(min_S_n_star, 0, 1)
+P_min_star
+P_max_star = pnorm(max_S_n_star, 0, 1)
+P_max_star
+
+x = seq(-2, +2, length = 100)
+y = dnorm(x, 0, 1)
+plot(x, y, pch = 19, col = "red")
+lines(x, y, col = "red", lwd = 2)
+arrows(min_S_n_star, 0.25, min_S_n_star, min(y), lwd = 3,  col = "blue")
+arrows(max_S_n_star, 0.25, max_S_n_star, min(y), lwd = 3,  col = "blue")
+
+P_max_star - P_min_star
+
+```

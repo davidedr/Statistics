@@ -17,7 +17,7 @@ rm(list = ls())
 
 ### Data load
 ```{r}
-dad_df = read.csv("C:\\Nuova cartella\\QM901x Predictive Analytics\\Week 2\\DAD_DATA_with_Model_Output.DOWNLOADED.csv")
+dad_df = read.csv("C:\\Nuova cartella\\QM901x Predictive Analytics\\Week 2\\DAD_DATA.DOWNLOADED.csv")
 
 dad_df$LN.TOTAL.COST = log(dad_df$TOTAL.COST.TO.HOSPITAL)
 ```
