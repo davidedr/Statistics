@@ -115,3 +115,144 @@ arrows(max_S_n_star, 0.25, max_S_n_star, min(y), lwd = 3,  col = "blue")
 P_max_star - P_min_star
 
 ```
+
+5. Compute probability that in N=120 tosse sof a fair coin, the number of heads is between 48 and 72
+
+X_i =p  one toss of the fair coin
+E_X = 1/2 = 0.5
+VAR_x = 1/4
+S_N = SUM_i_1_N X_i
+
+```{r}
+rm(list = ls())
+N = 120
+E_X = 1/2
+VAR_X = 1/4
+
+min_S_N = 48
+max_S_N = 72
+
+min_S_N_star = (min_S_N - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+max_S_N_star = (max_S_N - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+
+P_min_S_N_star = pnorm(min_S_N_star, 0, 1)
+P_max_S_N_star = pnorm(max_S_N_star, 0, 1)
+
+P_max_S_N_star - P_min_S_N_star
+
+x = seq(min_S_N_star-2*sqrt(VAR_X), max_S_N_star+2*sqrt(VAR_X), length = 100)
+y = dnorm(x, 0, 1)
+plot(x, y, pch = 19, col = "red")
+lines(x, y, col = "red", lwd = 2)
+arrows(min_S_N_star, 0.25, min_S_N_star, min(y), lwd = 3,  col = "blue")
+arrows(max_S_N_star, 0.25, max_S_N_star, min(y), lwd = 3,  col = "blue")
+
+```
+
+N = 200 tosses of perfect fair die. What's the probability that an even face will show up between 95 and 105 times
+```{r}
+rm(list = ls())
+
+N = 200
+p = 1/2
+faces = c(0, 1) # even face, odd face
+E_X = sum(faces)*p
+VAR_X = sum((faces - E_X)^2)/length(faces)
+
+min_S_N = 95
+max_S_N = 105
+
+min_S_N_star = (min_S_N - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+max_S_N_star = (max_S_N - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+
+P_min_S_N_star = pnorm(min_S_N_star, 0, 1)
+P_max_S_N_star = pnorm(max_S_N_star, 0, 1)
+
+P_max_S_N_star - P_min_S_N_star
+
+x = seq(min_S_N_star-2*sqrt(VAR_X), max_S_N_star+2*sqrt(VAR_X), length = 100)
+y = dnorm(x, 0, 1)
+plot(x, y, pch = 19, col = "red")
+lines(x, y, col = "red", lwd = 2)
+arrows(min_S_N_star, 0.25, min_S_N_star, min(y), lwd = 3,  col = "blue")
+arrows(max_S_N_star, 0.25, max_S_N_star, min(y), lwd = 3,  col = "blue")
+
+```
+
+```{r}
+rm(list = ls())
+
+N = 500
+p = c(1/10, 9/10)
+x_i = c(0, 1)
+E_X = crossprod(p, x_i) # inner product
+VAR_X = sum((x_i - E_X)^2)/length(x_i)
+
+min_S_N = 50
+max_S_N = 55
+
+min_S_N_star = (min_S_N - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+max_S_N_star = (max_S_N - N*E_X)/(sqrt(N)*sqrt(VAR_X))
+
+
+```
+
+Dice rolling
+```{r}
+s = c()
+for (i in 1:1000) {
+  sample = sample(1:6, 200, replace = TRUE, prob = rep(1/6, 6))
+  s = append(s, sum(sample))
+}
+plot(s)
+hist(s, breaks = 100, col = "light blue")
+
+
+```
+
+
+Coin tosses
+```{r}
+rm(list = ls())
+p = 0.5 # This is a fair coin
+N = 100000 # Number of tosses
+
+# use sample to sample from a vector (sample space)
+v = c()
+for (i in 1:1000) {
+  s = cumsum(sample(c(-1, 1), size = N, replace = TRUE, prob = c(p, 1-p)))
+  #print(s)
+  v[i] = s[length(s)]
+}
+hist(v, breaks=100)
+
+v = c()
+for (i in 1:1000) {
+  s = sum(sample(c(0, 1), size = N, replace = TRUE, prob = c(p, 1-p)))
+  #print(s)
+  v[i] = s
+}
+hist(v, breaks=100, col = "light blue")
+
+# use rbinom to draw a number from a Bernoulli distribution
+rbinom(n = 1, size = N, prob = p)
+
+```
+
+```{r}
+#Material taken from: http://www.rfortraders.com/simulation-of-a-coin-toss-in-r/
+  
+ # Create an empty list to store the results
+ results <- list()
+ for(i in 1:10000) {
+     coinTosses   <- cumsum(sample(c(-1,1), 1000, replace = TRUE)) 
+     results[[i]] <- coinTosses[length(coinTosses)]
+ }
+ 
+ # Unlist the list and create a histogram. Set a title and set the color and breaks
+hist(unlist(results), main = "Histogram of all the final p&l's",col = "lightblue", breaks = 100)
+ 
+ # Place a vertical line at 0 with a width of 2 in order to show the average of the distribution
+ abline(v = 0, col = "red", lwd = 2)
+```
+

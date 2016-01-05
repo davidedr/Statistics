@@ -1,0 +1,76 @@
+---
+title: "LinearRegression-Galton"
+author: "D"
+date: "24 dicembre 2015"
+output: html_document
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r}
+rm(list = ls())
+library(UsingR)
+data(galton)
+summary(galton)
+par(mfrow = c(1,1))
+
+plot(galton$child)
+plot(galton$parent)
+
+breaks = 100
+par(mfrow = c(1,2))
+hist(galton$child, col = "blue", breaks = breaks)
+hist(galton$parent, col = "blue", breaks = breaks)
+
+par(mfrow = c(1,1))
+hist(galton$child, col = "blue", breaks = breaks)
+meanChild = mean(galton$child)
+lines(rep(meanChild, breaks), seq(0, 150, length = breaks), col = "red", lwd = 5)
+
+```
+
+Average minimized sum of square deviations:
+```{r}
+mean_child = mean(galton$child)
+sd_child = sd(galton$child)
+
+points = 200
+mean_int = seq(mean_child - 2*sd_child, mean_child + 2*sd_child, length = points)
+
+rep_child = data.frame(matrix(rep(galton$child, points), ncol = points))
+rep_mean = data.frame(t(matrix(rep(mean_int, 928), ncol = 928)))
+sum_of_square_deviations = colSums((rep_child - rep_mean)^2)
+
+plot(mean_int, sum_of_square_deviations)
+lines(rep(mean_child, 2), c(min(sum_of_square_deviations), max(sum_of_square_deviations)), col = "red", lwd = 5)
+
+```
+
+```{r}
+plot(galton$parent, galton$child, col = "blue", pch = 19)
+
+```
+
+```{r}
+seed(1234)
+plot(jitter(galton$parent, factor = 2), galton$child, col = "blue", pch = 19)
+
+```
+
+See how many data we have for each (parent, child) combination:
+```{r}
+seed(1234)
+plot(jitter(galton$parent, factor = 2), jitter(galton$child, factor = 2), col = "blue", pch = 19)
+
+```
+
+
+You can also embed plots, for example:
+
+```{r, echo=FALSE}
+plot(cars)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
