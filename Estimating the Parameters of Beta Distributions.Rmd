@@ -1,0 +1,73 @@
+---
+title: "Estimating the Parameters of Beta Distribution"
+author: "D"
+date: "Jan 8th, 2017"
+output: html_document
+---
+This is from:
+http://stats.stackexchange.com/questions/12232/calculating-the-parameters-of-a-beta-distribution-using-the-mean-and-variance
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE, error=FALSE}
+rm(list=ls())
+
+```
+
+mu and var (i.e. sigma^2) are the mean and the variance of the final beta distribution. How do I compute the alpha nad beta paramters generatng the beta?
+
+alpha and beta are related to mu and variance via the relations:
+
+mu = alpha/(alpha+beta)
+variance = alpha*beta/((alpha+beta^2)*(alpha+beta+1))
+
+Inverting these relations gives;
+
+alpha = ((1-mu)/variance) - 1/mu)*mu^2
+beta = alpha*(1/mu -1)
+#beta = ((1-mu)/variance) - 1/mu)*mu*(1-mu)
+
+Can use this function:
+```{r}
+estBetaParams <- function(mu, variance) {
+  alpha <- ((1 - mu) / variance - 1 / mu) * mu ^ 2
+  beta <- alpha * (1 / mu - 1)
+  return(params = list(alpha = alpha, beta = beta))
+}
+
+```
+
+For example, I want a beta-distribution having mean mu=0.27 and variance var=0.324. The parameters are:
+```{r}
+mu=0.27
+variance=0.0324
+betas <- estBetaParams(mu, variance)
+betas
+```
+
+```{r}
+alpha <- betas$alpha
+beta <- betas$beta
+mu_check = alpha/(alpha+beta)
+mu_check
+variance_check = alpha*beta/((alpha+beta)^2*(alpha+beta+1))
+variance_check
+
+abs(mu-mu_check)<1E-4
+abs(variance-variance_check)<1E-4
+```
+
+```{r}
+sample=rbeta(1E6, shape1=betas$alpha, shape2=betas$beta)
+mean(sample)
+var(sample)
+```
+
+```{r}
+x=1:100/100
+y=dbeta(x, shape1=betas$alpha, shape2=betas$beta)
+par(mfrow=c(2,1))
+plot(x, y)
+y=pbeta(x, shape1=betas$alpha, shape2=betas$beta)
+plot(x, y)
+
+```
+

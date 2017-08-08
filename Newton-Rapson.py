@@ -16,7 +16,7 @@ x_0 = 2
 x_n = 5
 
 prev_accuracy = 0
-
+iter_num = 0
 while True:
     x_n1 = x_n - f(x_n)/f_prime(x_n)
     if abs(x_n - x_n1) < accuracy:
@@ -25,12 +25,13 @@ while True:
     # Avoid starving due to unreachable accuracy
     if prev_accuracy >0 and abs(x_n - x_n1) >= prev_accuracy:
         break
-    
+    iter_num += 1
     prev_accuracy = abs(x_n - x_n1)
     
     x_n = x_n1
     print(x_n, (x_0**(1/2) - x_n))
 
+print()
 print(x_n)
 if abs(x_n - x_n1) > accuracy:
     print("  accuracy: ",  str(accuracy), "not reached!")

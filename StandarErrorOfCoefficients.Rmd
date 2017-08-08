@@ -16,10 +16,6 @@ my.line = function(x, beta_0, beta_1) {
 }
 
 xvals = min(studytimedata$study.time):max(studytimedata$study.time)
-#lines(xvals, my.line(xvals, 25, 1.1), col="blue")
-#lines(xvals, my.line(xvals, 23, 1.2), col="yellowgreen")
-#lines(xvals, my.line(xvals, 24, 1.05), col="green")
-#lines(xvals, my.line(xvals, 27, 1.003), col="turquoise1")
 
 m = lm(exam.score ~ study.time, data=studytimedata)
 summary(m)
@@ -52,7 +48,7 @@ se_1 = s_1 / sqrt(df)
 se_1
 
 s = sqrt(sum(m$residuals**2)/df)
-se_0 = s*sqrt(sum(studytimedata$study.time^2)/(n*sum(studytimedata$study.time^2) - (sum(studytimedata$study.time))^2))
+se_0 = s*sqrt(sum(-studytimedata$study.time^2)/(n*sum(studytimedata$study.time^2) - (sum(studytimedata$study.time))^2))
 se_0
 
 t.value_0 = (m$coefficients[1] - 0)/se_0
