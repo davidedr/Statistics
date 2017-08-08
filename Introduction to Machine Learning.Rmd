@@ -1,0 +1,60 @@
+---
+title: "Untitled"
+author: "D"
+date: "08 agosto 2017"
+output: html_document
+---
+
+
+## R Example of EDA for Sepal Length in Iris dataset
+
+Combines boxplots, beeswarm and stripchart plots
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+rm(list = ls())
+
+if(!require(datasets)) install.packages("datasets",repos = "http://cran.us.r-project.org")
+if(!require(beeswarm)) install.packages("beeswarm",repos = "http://cran.us.r-project.org")
+
+```
+
+```{r}
+library(datasets)
+
+dim(iris)
+str(iris)
+
+head(iris, 1)
+tail(iris, 1)
+
+summary(iris)
+
+hist(iris$Sepal.Length, main = 'Sepal Length', xlab = 'cm')
+
+library(beeswarm)
+vertical = TRUE
+stripchart(data = iris, Sepal.Length ~ Species, vertical = vertical, method = 'jitter', jitter = 0.2, cex = 1, pch = 16, col = rainbow(8), main = 'Sepal.Length vs Species\nstripchart', ylab = 'cm')
+beeswarm(Sepal.Length ~ Species, data = iris, vertical = vertical, pch = 16, col = rainbow(8), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm')
+boxplot(data = iris, Sepal.Length ~ Species, horizontal = !(vertical), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm')
+
+vertical = FALSE
+stripchart(data = iris, Sepal.Length ~ Species, vertical = vertical, method = 'jitter', jitter = 0.2, cex = 1, pch = 16, col = rainbow(8), main = 'Sepal.Length vs Species\nstripchart', xlab = 'cm')
+beeswarm(Sepal.Length ~ Species, data = iris, vertical = vertical, pch = 16, col = rainbow(8), main = 'Sepal.Length vs Species\nbeeswarm', xlab = 'cm')
+boxplot(data = iris, Sepal.Length ~ Species, horizontal = !(vertical), main = 'Sepal.Length vs Species\nbeeswarm', xlab = 'cm')
+
+```
+
+```{r}
+vertical = TRUE
+boxplot(data = iris, Sepal.Length ~ Species, horizontal = !(vertical), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm', outline = FALSE)
+beeswarm(Sepal.Length ~ Species, data = iris, vertical = vertical, pch = 16, col = rainbow(8), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm', add = TRUE)
+
+```
+
+```{r}
+vertical = FALSE
+boxplot(data = iris, Sepal.Length ~ Species, horizontal = !(vertical), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm', outline = FALSE)
+beeswarm(Sepal.Length ~ Species, data = iris, vertical = vertical, pch = 16, col = rainbow(8), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm', add = TRUE)
+
+```
