@@ -6,7 +6,7 @@ output: html_document
 ---
 
 
-## R Example of EDA for Sepal Length in Iris dataset
+## R example of EDA for Sepal Length in Iris dataset
 
 Combines boxplots, beeswarm and stripchart plots
 
@@ -16,6 +16,7 @@ rm(list = ls())
 
 if(!require(datasets)) install.packages("datasets",repos = "http://cran.us.r-project.org")
 if(!require(beeswarm)) install.packages("beeswarm",repos = "http://cran.us.r-project.org")
+if(!require(ISLR)) install.packages("ISLR",repos = "http://cran.us.r-project.org")
 
 ```
 
@@ -57,4 +58,55 @@ vertical = FALSE
 boxplot(data = iris, Sepal.Length ~ Species, horizontal = !(vertical), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm', outline = FALSE)
 beeswarm(Sepal.Length ~ Species, data = iris, vertical = vertical, pch = 16, col = rainbow(8), main = 'Sepal.Length vs Species\nbeeswarm', ylab = 'cm', add = TRUE)
 
+```
+
+## Regression example: Wages dataset
+
+```{r}
+library(ISLR)
+plot(x = Wage$age, y = Wage$wage, pch = 16, col='red')
+hist(Wage$wage)
+```
+
+Build a linear regression model:
+```{r}
+lm_wage <- lm(wage ~ age, data = Wage)
+unseen <- data.frame(age = 60)
+str(unseen)
+```
+Predict wage for 60-year old worker:
+```{r}
+# Predict the wage for a 60-year old worker
+predict(lm_wage, unseen)
+```
+
+## Classification example: Spam filtering
+
+```{r}
+rm(list = ls())
+emails = read.csv("emails_small.csv")
+plot(emails, pch = 16, col="red", main="Spam/Ham vs average number of capital letters")
+```
+
+Prediction function:
+```{r}
+# Inspect definition of spam_classifier()
+spam_classifier <- function(x){
+  prediction <- rep(NA, length(x)) # initialize prediction vector
+  prediction[x > 4] <- 1
+  prediction[x >= 3 & x <= 4] <- 0
+  prediction[x >= 2.2 & x < 3] <- 1
+  prediction[x >= 1.4 & x < 2.2] <- 0
+  prediction[x > 1.25 & x < 1.4] <- 1
+  prediction[x <= 1.25] <- 0
+  return(prediction) # prediction is either 0 or 1
+}
+```
+
+```{r}
+# Apply the classifier to the avg_capital_seq column: spam_pred
+spam_pred = spam_classifier(emails$avg_capital_seq)
+
+# Compare spam_pred to emails$spam. Use ==
+spam_pred == emails$spam
 ```
