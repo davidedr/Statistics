@@ -17,6 +17,8 @@ rm(list = ls())
 if(!require(datasets)) install.packages("datasets",repos = "http://cran.us.r-project.org")
 if(!require(beeswarm)) install.packages("beeswarm",repos = "http://cran.us.r-project.org")
 if(!require(ISLR)) install.packages("ISLR",repos = "http://cran.us.r-project.org")
+if(!require(cluster)) install.packages("cluster",repos = "http://cran.us.r-project.org")
+if(!require(rpart)) install.packages("rpart",repos = "http://cran.us.r-project.org")
 
 ```
 
@@ -85,7 +87,7 @@ predict(lm_wage, unseen)
 ```{r}
 rm(list = ls())
 emails = read.csv("emails_small.csv")
-plot(emails, pch = 16, col="red", main="Spam/Ham vs average number of capital letters")
+plot(emails$spam ~ emails$avg_capital_seq, pch = 16, main="Spam/Ham vs average number of capital letters", col = emails$spam+1)
 ```
 
 Prediction function:
@@ -135,3 +137,67 @@ plot(linkedin ~ days, xlim = c(1, 24), pch = 16)
 points(22:24, linkedin_pred, pch = 16, col = "red")
 ```
 
+## Clustering example: Separating the iris species
+
+```{r}
+rm(list = ls())
+library(datasets)
+
+# Set random seed. Don't remove this line.
+set.seed(1)
+
+# Chop up iris in my_iris and species
+my_iris <- iris[-5]
+species <- iris$Species
+
+# Perform k-means clustering on my_iris: kmeans_iris
+kmeans_iris = kmeans(my_iris, 3)
+
+# Compare the actual Species to the clustering using table()
+table(species, kmeans_iris$cluster)
+
+# Plot Petal.Width against Petal.Length, coloring by cluster
+plot(x = kmeans_iris$centers[, 3], y = kmeans_iris$centers[, 4], pch = '+', col = 'blue')
+points(y = my_iris$Petal.Length, x = my_iris$Petal.Width, col = kmeans_iris$cluster, pch = 'o')
+```
+
+```{r}
+plot(x = kmeans_iris$centers[, 3], y = kmeans_iris$centers[, 4], pch = '+', col = 'blue')
+```
+```{r}
+plot(Petal.Length ~ Petal.Width, data = my_iris, col = kmeans_iris$cluster, pch = 16)
+```
+```{r}
+library(cluster)
+clusplot(my_iris, kmeans_iris$cluster, main='2D representation of the Cluster solution', color=TRUE, shade=TRUE, labels=3, lines=0)
+```
+
+## Supervised learning with Decision Trees example using the Iris dataset
+
+Build a decision tree predictor for the Species feature based on the other features
+```{r}
+rm(list = ls())
+library(rpart)
+
+# Set random seed. Don't remove this line.
+set.seed(1)
+
+# Take a look at the iris dataset
+str(iris)
+summary(iris)
+
+# A decision tree model has been built for you
+tree <- rpart(Species ~ Sepal.Length + Sepal.Width + Petal.Length + Petal.Width,
+              data = iris, method = "class")
+
+# A dataframe containing unseen observations
+unseen <- data.frame(Sepal.Length = c(5.3, 7.2),
+                     Sepal.Width = c(2.9, 3.9),
+                     Petal.Length = c(1.7, 5.4),
+                     Petal.Width = c(0.8, 2.3))
+unseen
+
+# Predict the label of the unseen observations. Print out the result.
+prediction = predict(tree, unseen, type = 'class')
+prediction
+```
