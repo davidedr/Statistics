@@ -14,11 +14,12 @@ Combines boxplots, beeswarm and stripchart plots
 knitr::opts_chunk$set(echo = TRUE)
 rm(list = ls())
 
-if(!require(datasets)) install.packages("datasets",repos = "http://cran.us.r-project.org")
-if(!require(beeswarm)) install.packages("beeswarm",repos = "http://cran.us.r-project.org")
-if(!require(ISLR)) install.packages("ISLR",repos = "http://cran.us.r-project.org")
-if(!require(cluster)) install.packages("cluster",repos = "http://cran.us.r-project.org")
-if(!require(rpart)) install.packages("rpart",repos = "http://cran.us.r-project.org")
+repo = "http://cran.us.r-project.org"
+if(!require(datasets)) install.packages("datasets",repos = repo)
+if(!require(beeswarm)) install.packages("beeswarm",repos = repo)
+if(!require(ISLR)) install.packages("ISLR",repos = repo)
+if(!require(cluster)) install.packages("cluster",repos = repo)
+if(!require(rpart)) install.packages("rpart",repos = repo)
 
 ```
 
@@ -152,21 +153,28 @@ species <- iris$Species
 
 # Perform k-means clustering on my_iris: kmeans_iris
 kmeans_iris = kmeans(my_iris, 3)
+```
 
+Clusters' centers:
+```{r}
+kmeans_iris$centers
+```
+
+
+```{r}
 # Compare the actual Species to the clustering using table()
 table(species, kmeans_iris$cluster)
 
 # Plot Petal.Width against Petal.Length, coloring by cluster
-plot(x = kmeans_iris$centers[, 3], y = kmeans_iris$centers[, 4], pch = '+', col = 'blue')
-points(y = my_iris$Petal.Length, x = my_iris$Petal.Width, col = kmeans_iris$cluster, pch = 'o')
+legend = c('Setosa', 'Versicolor', 'Virginica')
+col = c(1, 2, 3)
+pch = 16
+plot(x = my_iris$Petal.Width, y = my_iris$Petal.Length, col = kmeans_iris$cluster, pch = 16, main = 'Iris classification by Petal dimensions', xlab = 'Pental width [cm]', ylab = 'Pental length [cm]')
+legend("topleft", legend = legend, col = col, pch = pch)
+plot(x = my_iris$Sepal.Width, y = my_iris$Sepal.Length, col = kmeans_iris$cluster, pch = 16, main = 'Iris classification by Sepal dimensions', xlab = 'Sepal width [cm]', ylab = 'Sepal length [cm]')
+legend("topleft", legend = legend, col = col, pch = pch)
 ```
 
-```{r}
-plot(x = kmeans_iris$centers[, 3], y = kmeans_iris$centers[, 4], pch = '+', col = 'blue')
-```
-```{r}
-plot(Petal.Length ~ Petal.Width, data = my_iris, col = kmeans_iris$cluster, pch = 16)
-```
 ```{r}
 library(cluster)
 clusplot(my_iris, kmeans_iris$cluster, main='2D representation of the Cluster solution', color=TRUE, shade=TRUE, labels=3, lines=0)
@@ -201,3 +209,42 @@ unseen
 prediction = predict(tree, unseen, type = 'class')
 prediction
 ```
+
+## Unsupervised learning w/ kmeans for the mtcars dataset
+
+```{r}
+rm(list = ls())
+library(datasets)
+
+mtcars_wt_hp = mtcars[c('wt', 'hp')]
+models = as.character(rownames(mtcars))
+
+plot(mtcars_wt_hp, pch = 16, col = 'red', main = "Power vs Weight")
+plot(mtcars_wt_hp, pch = 16, col = 'red', main = 'Power vs Weight with Labels')
+text(mtcars_wt_hp, labels = models, cex = 0.7)
+
+mtcars_wt_hp_kmeans = kmeans(mtcars_wt_hp, 2)
+
+plot(mtcars_wt_hp, pch = 16, col = mtcars_wt_hp_kmeans$cluster, main = "Power vs Weight w/ K Means' centroids")
+points(mtcars_wt_hp_kmeans$centers, pch = 22, col = c(1, 2), cex = 2.5, bg = c(1, 2))
+
+library(cluster)
+clusplot(mtcars_wt_hp, mtcars_wt_hp_kmeans$cluster, main = '2D representation of the Cluster solution', color = TRUE, shade = TRUE, labels = 2, lines = 0, cex=0.7)
+
+```
+
+Classification result:
+```{r}
+mtcars_wt_hp_kmeans$cluster
+
+plot(mtcars_wt_hp, col = mtcars_wt_hp_kmeans$cluster + 1, main = 'Classification result', pch = 16)
+text(mtcars_wt_hp, labels = models, cex = 0.7)
+```
+
+```{r}
+mtcars_wt_hp$hp_wt = mtcars_wt_hp$hp/mtcars_wt_hp$wt
+plot(mtcars_wt_hp$hp_wt, col = 'red', pch = 16, main = 'Power, weight ratio')
+text(mtcars_wt_hp$hp_wt, labels = models, cex = 0.7)
+hist(mtcars_wt_hp$hp_wt)
+```
+
